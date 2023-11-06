@@ -1,0 +1,26 @@
+[package]
+name = "ip-api4rs"
+version = "0.1.0"
+description = "A Rust library for the ip-api.com API"
+edition = "2021"
+license = "Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+# Async runtime
+tokio = { version = "1.33.0", features = ["rt", "macros", "rt-multi-thread"] }
+
+# Serialization and deserialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# Logging
+log = "0.4"
