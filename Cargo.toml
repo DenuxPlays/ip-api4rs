@@ -1,8 +1,10 @@
 [package]
 name = "ip-api4rs"
 version = "0.1.0"
+authors = ["Timon Klinkert <DenuxPlays@users.noreply.github.com>"]
 description = "A Rust library for the ip-api.com API."
 edition = "2021"
+rust-version = "1.73.0"
 license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
