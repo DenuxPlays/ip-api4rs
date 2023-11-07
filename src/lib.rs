@@ -1,6 +1,5 @@
 #![deny(missing_docs)]
 
-pub mod api;
 pub mod constant;
 pub mod model;
 pub mod util;
