@@ -13,10 +13,11 @@ use serde_aux::prelude::serde_introspect;
 /// # Returns
 /// A `String` containing the url for the request.
 pub fn build_url_from_struct<'de, T>(https: bool, ip: &String) -> String
-	where T: Deserialize<'de>,
+where
+    T: Deserialize<'de>,
 {
 	let fields = serde_introspect::<T>();
-	build_url_with_fields(https, ip, fields)
+    build_url_with_fields(https, ip, fields)
 }
 
 /// Builds the HTTP url for a request.
@@ -28,7 +29,8 @@ pub fn build_url_from_struct<'de, T>(https: bool, ip: &String) -> String
 /// # Returns
 /// A `String` containing the url for the request.
 pub fn build_http_url_from_struct<'de, T>(ip: &String) -> String
-where T: Deserialize<'de>,
+where
+    T: Deserialize<'de>,
 {
 	let fields = serde_introspect::<T>();
 	build_url_with_fields(false, ip, fields)
@@ -43,7 +45,8 @@ where T: Deserialize<'de>,
 /// # Returns
 /// A `String` containing the url for the request.
 pub fn build_https_url_from_struct<'de, T>(ip: &String) -> String
-where T: Deserialize<'de>,
+where
+    T: Deserialize<'de>,
 {
 	let fields = serde_introspect::<T>();
 	build_url_with_fields(true, ip, fields)
@@ -57,10 +60,10 @@ where T: Deserialize<'de>,
 /// # Returns
 /// A `String` containing the url for the request.
 pub fn build_url_without_fields(https: bool, ip: &String) -> String {
-	match https {
-		true => format!("{}/{}", crate::constant::HTTPS_HOST, ip),
-		false => format!("{}/{}", crate::constant::HTTP_HOST, ip),
-	}
+    match https {
+        true => format!("{}{}", crate::constant::HTTPS_HOST, ip),
+        false => format!("{}{}", crate::constant::HTTP_HOST, ip),
+    }
 }
 
 /// Builds the url for a request with fields.
@@ -70,9 +73,9 @@ pub fn build_url_without_fields(https: bool, ip: &String) -> String {
 ///
 /// # Returns
 /// A `String` containing the url for the request.
-pub fn build_url_with_fields(https: bool, ip: &String, fields: &[&str]) -> String {
+pub fn build_url_with_fields(https: bool, ip: &String, fields: &[&'static str]) -> String {
     match https {
-        true => format!("{}/{}?fields={}", crate::constant::HTTPS_HOST, ip, fields.join(",")),
-        false => format!("{}/{}?fields={}", crate::constant::HTTP_HOST, ip, fields.join(",")),
+        true => format!("{}{}?fields={}", crate::constant::HTTPS_HOST, ip, fields.join(",")),
+        false => format!("{}{}?fields={}", crate::constant::HTTP_HOST, ip, fields.join(",")),
     }
 }
