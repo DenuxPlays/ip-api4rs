@@ -74,8 +74,13 @@ pub fn build_url_without_fields(https: bool, ip: &String) -> String {
 /// # Returns
 /// A `String` containing the url for the request.
 pub fn build_url_with_fields(https: bool, ip: &String, fields: &[&'static str]) -> String {
+    let mut fields_str = fields.join(",");
+    if !fields.contains(&"message") {
+        //We do this to get the error message if an error occurs.
+        fields_str = fields.join(",") + ",message";
+    }
     match https {
-        true => format!("{}{}?fields={}", crate::constant::HTTPS_HOST, ip, fields.join(",")),
-        false => format!("{}{}?fields={}", crate::constant::HTTP_HOST, ip, fields.join(",")),
+        true => format!("{}{}?fields={}", crate::constant::HTTPS_HOST, ip, fields_str),
+        false => format!("{}{}?fields={}", crate::constant::HTTP_HOST, ip, fields_str),
     }
 }

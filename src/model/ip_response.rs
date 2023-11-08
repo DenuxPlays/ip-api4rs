@@ -57,3 +57,11 @@ pub struct IpDefaultResponse {
     #[serde(rename = "as")]
     pub as_number: String,
 }
+
+/// A module that contains the error type for the library.
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
+pub struct ErrorResponse {
+    pub status: String,
+    pub message: String,
+    pub query: String,
+}
