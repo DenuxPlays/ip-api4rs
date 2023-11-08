@@ -12,6 +12,12 @@ edition = "2021"
 rust-version = "1.73.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dev-dependencies]
+# Async runtime
+tokio = { version = "1.33.0", features = ["rt", "macros", "rt-multi-thread"] }
+
+# Logging
+simple_logger = "4.2.0"
 
 [dependencies]
 # HTTP client
@@ -21,12 +27,8 @@ reqwest = { version = "0.11", features = ["json"] }
 governor = "0.6.0"
 nonzero_ext = { version = "0.3.0", default-features = false }
 
-# Async runtime
-tokio = { version = "1.33.0", features = ["rt", "macros", "rt-multi-thread"] }
-
 # Serialization and deserialization
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
 serde-aux = "4.2.0"
 
 # Error handling
