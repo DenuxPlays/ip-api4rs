@@ -33,10 +33,6 @@ async fn main() {
 - Api-Token support
 - SSL support
 
-## Planed features
-
-- DNS Api support
-
 ## Features that won't be added
 **This doesn't mean that we would not implement features listed here.**<br>
 We just won't implement them ourselves.<br>
@@ -44,3 +40,4 @@ Feel free to open a pull request if you want to add more features.
 
 - Batch requests
 - non Json responses
+- DNS Api support
