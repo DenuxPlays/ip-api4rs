@@ -16,7 +16,7 @@ pub fn build_url_from_struct<'de, T>(https: bool, ip: &String) -> String
 where
     T: Deserialize<'de>,
 {
-	let fields = serde_introspect::<T>();
+    let fields = serde_introspect::<T>();
     build_url_with_fields(https, ip, fields)
 }
 
@@ -32,8 +32,8 @@ pub fn build_http_url_from_struct<'de, T>(ip: &String) -> String
 where
     T: Deserialize<'de>,
 {
-	let fields = serde_introspect::<T>();
-	build_url_with_fields(false, ip, fields)
+    let fields = serde_introspect::<T>();
+    build_url_with_fields(false, ip, fields)
 }
 
 /// Builds the HTTPS url for a request.
@@ -48,8 +48,8 @@ pub fn build_https_url_from_struct<'de, T>(ip: &String) -> String
 where
     T: Deserialize<'de>,
 {
-	let fields = serde_introspect::<T>();
-	build_url_with_fields(true, ip, fields)
+    let fields = serde_introspect::<T>();
+    build_url_with_fields(true, ip, fields)
 }
 
 /// Builds the url for a request without fields.

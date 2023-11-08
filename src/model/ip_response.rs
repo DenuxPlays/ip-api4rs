@@ -4,35 +4,35 @@ use serde::{Deserialize, Serialize};
 /// We ask the Api to return every field it can.
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct IpFullResponse {
-    query: String,
-    status: String,
-    continent: String,
+    pub query: String,
+    pub status: String,
+    pub continent: String,
     #[serde(rename = "continentCode")]
-    continent_code: String,
-    country: String,
+    pub continent_code: String,
+    pub country: String,
     #[serde(rename = "countryCode")]
-    country_code: String,
-    region: String,
+    pub country_code: String,
+    pub region: String,
     #[serde(rename = "regionName")]
-    region_name: String,
-    city: String,
-    district: String,
-    zip: String,
-    lat: f32,
-    lon: f32,
-    timezone: String,
-    offset: i32,
-    currency: String,
-    isp: String,
-    org: String,
+    pub region_name: String,
+    pub city: String,
+    pub district: String,
+    pub zip: String,
+    pub lat: f32,
+    pub lon: f32,
+    pub timezone: String,
+    pub offset: i32,
+    pub currency: String,
+    pub isp: String,
+    pub org: String,
     #[serde(rename = "as")]
-    as_number: String,
+    pub as_number: String,
     #[serde(rename = "asname")]
-    as_name: String,
-    reverse: String,
-    mobile: bool,
-    proxy: bool,
-    hosting: bool,
+    pub as_name: String,
+    pub reverse: String,
+    pub mobile: bool,
+    pub proxy: bool,
+    pub hosting: bool,
 }
 
 /// A struct containing the default response from the Ip Api.
