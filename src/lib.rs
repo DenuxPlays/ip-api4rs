@@ -4,12 +4,13 @@
 
 use governor::{DefaultDirectRateLimiter, Quota, RateLimiter};
 use nonzero_ext::nonzero;
-use reqwest::Error;
 use serde::de::DeserializeOwned;
 
+use crate::error::IpApiError;
 use model::ip_response::{IpDefaultResponse, IpFullResponse};
 
 pub mod constant;
+pub mod error;
 pub mod model;
 pub mod request_handler;
 pub mod util;
@@ -56,7 +57,7 @@ impl IpApiClient {
     ///
     /// # Returns
     /// * `IpDefaultResponse` - The response from the API.
-    pub async fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, Error> {
+    pub async fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, IpApiError> {
         let request = util::requests::build_default_get_request(&ip.to_string(), self);
         request_handler::perform_get_request::<IpDefaultResponse>(request, &self.limiter).await
     }
@@ -68,7 +69,7 @@ impl IpApiClient {
     ///
     /// # Returns
     /// * `IpFullResponse` - The response from the API.
-    pub async fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, Error> {
+    pub async fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, IpApiError> {
         let request = util::requests::build_get_request::<IpFullResponse>(&ip.to_string(), self);
         request_handler::perform_get_request::<IpFullResponse>(request, &self.limiter).await
     }
@@ -80,7 +81,7 @@ impl IpApiClient {
     ///
     /// # Returns
     /// * `T` - The response from the API.
-    pub async fn query_api<T>(&self, ip: &String) -> Result<T, Error>
+    pub async fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
     where
         T: DeserializeOwned,
     {
@@ -91,6 +92,7 @@ impl IpApiClient {
 
 #[cfg(test)]
 mod test {
+    use crate::error::IpApiError;
     use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
     use crate::util::urls::{build_http_url_from_struct, build_https_url_from_struct, build_url_without_fields};
     use crate::IpApiClient;
@@ -113,13 +115,13 @@ mod test {
     #[test]
     fn test_custom_http_url() {
         let url = build_http_url_from_struct::<IpFullResponse>(&TEST_IP.to_string());
-        assert_eq!(url, format!("http://ip-api.com/json/{}?fields=query,status,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting", TEST_IP));
+        assert_eq!(url, format!("http://ip-api.com/json/{}?fields=query,status,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,message", TEST_IP));
     }
 
     #[test]
     fn test_custom_https_url() {
         let url = build_https_url_from_struct::<IpFullResponse>(&TEST_IP.to_string());
-        assert_eq!(url, format!("https://ip-api.com/json/{}?fields=query,status,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting", TEST_IP));
+        assert_eq!(url, format!("https://ip-api.com/json/{}?fields=query,status,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,message", TEST_IP));
     }
 
     #[tokio::test]
@@ -170,5 +172,29 @@ mod test {
         };
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), expected);
+    }
+
+    #[tokio::test]
+    async fn test_error_reserved_range() {
+        let client = IpApiClient::new();
+        let result = client.query_api::<IpDefaultResponse>(&"127.0.0.1".to_string()).await;
+        match result.err().unwrap() {
+            IpApiError::ReservedRange(error_response) => {
+                assert_eq!(error_response.message, "reserved range");
+            }
+            _ => panic!("Wrong error type returned."),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_error_invalid_query() {
+        let client = IpApiClient::new();
+        let result = client.query_api::<IpDefaultResponse>(&"Invalid Query".to_string()).await;
+        match result.err().unwrap() {
+            IpApiError::InvalidQuery(error_response) => {
+                assert_eq!(error_response.message, "invalid query");
+            }
+            _ => panic!("Wrong error type returned."),
+        }
     }
 }
