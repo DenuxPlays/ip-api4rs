@@ -94,6 +94,7 @@ impl IpApiClient {
 
 #[cfg(test)]
 mod test {
+	use crate::blocking::client::BlockingIpApiClient;
     use crate::error::IpApiError;
     use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
     use crate::util::urls::{build_http_url_from_struct, build_https_url_from_struct, build_url_without_fields};
@@ -199,4 +200,54 @@ mod test {
             _ => panic!("Wrong error type returned."),
         }
     }
+
+	#[test]
+	fn test_blocking_client() {
+		let client = BlockingIpApiClient::new();
+		assert_eq!(client.inner_client.api_key, None);
+		let result = client.query_api_default(&EXTERN_TEST_IP.to_string());
+		let expected = IpDefaultResponse {
+			query: EXTERN_TEST_IP.to_string(),
+			status: "success".to_string(),
+			country: "United States".to_string(),
+			country_code: "US".to_string(),
+			region: "VA".to_string(),
+			region_name: "Virginia".to_string(),
+			city: "Ashburn".to_string(),
+			zip: "20149".to_string(),
+			lat: 39.03,
+			lon: -77.5,
+			timezone: "America/New_York".to_string(),
+			isp: "Google LLC".to_string(),
+			org: "Google Public DNS".to_string(),
+			as_number: "AS15169 Google LLC".to_string(),
+		};
+		assert!(result.is_ok());
+		assert_eq!(result.unwrap(), expected);
+	}
+
+	#[test]
+	fn test_blocking_client_custom() {
+		let client = BlockingIpApiClient::new();
+		assert_eq!(client.inner_client.api_key, None);
+		let result = client.query_api::<IpDefaultResponse>(&EXTERN_TEST_IP.to_string());
+		let expected = IpDefaultResponse {
+			query: EXTERN_TEST_IP.to_string(),
+			status: "success".to_string(),
+			country: "United States".to_string(),
+			country_code: "US".to_string(),
+			region: "VA".to_string(),
+			region_name: "Virginia".to_string(),
+			city: "Ashburn".to_string(),
+			zip: "20149".to_string(),
+			lat: 39.03,
+			lon: -77.5,
+			timezone: "America/New_York".to_string(),
+			isp: "Google LLC".to_string(),
+			org: "Google Public DNS".to_string(),
+			as_number: "AS15169 Google LLC".to_string(),
+		};
+		assert!(result.is_ok());
+		assert_eq!(result.unwrap(), expected);
+	}
 }

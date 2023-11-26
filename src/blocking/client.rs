@@ -6,7 +6,7 @@ use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
 use crate::IpApiClient;
 
 /// A client for the ip-api.com API that blocks the current thread.
-struct BlockingIpApiClient {
+pub struct BlockingIpApiClient {
     /// The inner client to use for the requests.
     pub inner_client: IpApiClient,
     /// The runtime to use for the requests.
@@ -70,7 +70,7 @@ impl BlockingIpApiClient {
     ///
     /// # Returns
     /// * `T` - The response from the API.
-    pub async fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
+    pub fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
     where
         T: DeserializeOwned,
     {
