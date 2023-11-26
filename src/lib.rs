@@ -9,6 +9,8 @@ use serde::de::DeserializeOwned;
 use crate::error::IpApiError;
 use model::ip_response::{IpDefaultResponse, IpFullResponse};
 
+#[cfg(feature = "blocking")]
+pub mod blocking;
 pub mod constant;
 pub mod error;
 pub mod model;

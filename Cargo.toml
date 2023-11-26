@@ -11,12 +11,17 @@ readme = "README.md"
 edition = "2021"
 rust-version = "1.73.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+blocking = ["dep:tokio"]
+
 [dev-dependencies]
 # Async runtime
 tokio = { version = "1.33.0", features = ["rt", "macros", "rt-multi-thread"] }
 
 [dependencies]
+#Async runtime
+tokio = { version = "1.33.0", features = ["rt", "macros", "rt-multi-thread"], optional = true }
+
 # HTTP client
 reqwest = { version = "0.11", features = ["json"] }
 
