@@ -55,17 +55,17 @@ impl IpApi for BlockingIpApiClient {
 }
 
 impl BlockingIpApi for BlockingIpApiClient {
-    fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, IpApiError> {
+    fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError> {
         let request = util::requests::get_default_blocking_get_request(&ip.to_string(), self);
         request_handler::perform_blocking_get_request::<IpDefaultResponse>(request, &self.limiter)
     }
 
-    fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, IpApiError> {
+    fn query_api_fully(&self, ip: &str) -> Result<IpFullResponse, IpApiError> {
         let request = util::requests::get_blocking_get_request::<IpFullResponse>(&ip.to_string(), self);
         request_handler::perform_blocking_get_request::<IpFullResponse>(request, &self.limiter)
     }
 
-    fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
+    fn query_api<T>(&self, ip: &str) -> Result<T, IpApiError>
     where
         T: DeserializeOwned,
     {

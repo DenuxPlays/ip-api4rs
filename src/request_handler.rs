@@ -28,7 +28,6 @@ where
     wait_for_rate_limiter(limiter).await;
     let response = request_builder.send().await?;
     let json = response.text().await?;
-    println!("{}", json);
     process_result(json)
 }
 
@@ -66,9 +65,8 @@ fn process_result<T>(json: String) -> Result<T, IpApiError>
 where
     T: DeserializeOwned,
 {
-    match validate_result(json.clone()) {
-        Some(error) => return Err(error),
-        None => (),
+    if let Some(error) = validate_result(json.clone()) {
+        return Err(error);
     }
     parse_result::<T>(&json)
 }
@@ -101,11 +99,11 @@ fn validate_result(json: String) -> Option<IpApiError> {
 ///
 /// # Returns
 /// * `Result<T, ip-api4rs::error::IpApiError>` - The parsed result.
-fn parse_result<T>(json: &String) -> Result<T, IpApiError>
+fn parse_result<T>(json: &str) -> Result<T, IpApiError>
 where
     T: DeserializeOwned,
 {
-    match serde_json::from_str::<T>(&json) {
+    match serde_json::from_str::<T>(json) {
         Ok(response) => Ok(response),
         Err(err) => Err(IpApiError::JsonParseError(err)),
     }

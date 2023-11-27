@@ -69,18 +69,17 @@ impl IpApi for IpApiClient {
 
 #[async_trait]
 impl AsyncIpApi for IpApiClient {
-    async fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, IpApiError> {
+    async fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError> {
         let request = util::requests::get_default_async_get_request(&ip.to_string(), self);
-        println!("{:?}", request);
         request_handler::perform_get_request::<IpDefaultResponse>(request, &self.limiter).await
     }
 
-    async fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, IpApiError> {
+    async fn query_api_fully(&self, ip: &str) -> Result<IpFullResponse, IpApiError> {
         let request = util::requests::get_async_request::<IpFullResponse>(&ip.to_string(), self);
         request_handler::perform_get_request::<IpFullResponse>(request, &self.limiter).await
     }
 
-    async fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
+    async fn query_api<T>(&self, ip: &str) -> Result<T, IpApiError>
     where
         T: DeserializeOwned,
     {
@@ -133,7 +132,7 @@ mod test {
     async fn test_client() {
         let client = IpApiClient::new();
         assert_eq!(client.api_key, None);
-        let result = client.query_api_default(&EXTERN_TEST_IP.to_string()).await;
+        let result = client.query_api_default(EXTERN_TEST_IP).await;
         let expected = IpDefaultResponse {
             query: EXTERN_TEST_IP.to_string(),
             status: "success".to_string(),
@@ -150,7 +149,6 @@ mod test {
             org: "Google Public DNS".to_string(),
             as_number: "AS15169 Google LLC".to_string(),
         };
-        print!("{:?}", result);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), expected);
     }
@@ -159,7 +157,7 @@ mod test {
     async fn test_client_custom() {
         let client = IpApiClient::new();
         assert_eq!(client.api_key, None);
-        let result = client.query_api::<IpDefaultResponse>(&EXTERN_TEST_IP.to_string()).await;
+        let result = client.query_api::<IpDefaultResponse>(EXTERN_TEST_IP).await;
         let expected = IpDefaultResponse {
             query: EXTERN_TEST_IP.to_string(),
             status: "success".to_string(),
@@ -183,7 +181,7 @@ mod test {
     #[tokio::test]
     async fn test_error_reserved_range() {
         let client = IpApiClient::new();
-        let result = client.query_api::<IpDefaultResponse>(&"127.0.0.1".to_string()).await;
+        let result = client.query_api::<IpDefaultResponse>("127.0.0.1").await;
         match result.err().unwrap() {
             IpApiError::ReservedRange(error_response) => {
                 assert_eq!(error_response.message, "reserved range");
@@ -195,7 +193,7 @@ mod test {
     #[tokio::test]
     async fn test_error_invalid_query() {
         let client = IpApiClient::new();
-        let result = client.query_api::<IpDefaultResponse>(&"Invalid Query".to_string()).await;
+        let result = client.query_api::<IpDefaultResponse>("Invalid Query").await;
         match result.err().unwrap() {
             IpApiError::InvalidQuery(error_response) => {
                 assert_eq!(error_response.message, "invalid query");
@@ -208,7 +206,7 @@ mod test {
     fn test_blocking_client() {
         let client = BlockingIpApiClient::new();
         assert_eq!(client.api_key, None);
-        let result = client.query_api_default(&EXTERN_TEST_IP.to_string());
+        let result = client.query_api_default(EXTERN_TEST_IP);
         let expected = IpDefaultResponse {
             query: EXTERN_TEST_IP.to_string(),
             status: "success".to_string(),
@@ -233,7 +231,7 @@ mod test {
     fn test_blocking_client_custom() {
         let client = BlockingIpApiClient::new();
         assert_eq!(client.api_key, None);
-        let result = client.query_api::<IpDefaultResponse>(&EXTERN_TEST_IP.to_string());
+        let result = client.query_api::<IpDefaultResponse>(EXTERN_TEST_IP);
         let expected = IpDefaultResponse {
             query: EXTERN_TEST_IP.to_string(),
             status: "success".to_string(),

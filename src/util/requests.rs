@@ -21,7 +21,7 @@ use crate::util::urls::build_url_from_struct;
 /// # Returns
 /// A `RequestBuilder` for the request.
 pub fn get_default_async_get_request(query: &String, client: &impl AsyncIpApi) -> RequestBuilder {
-    get_async_request::<IpDefaultResponse>(&query, client)
+    get_async_request::<IpDefaultResponse>(query, client)
 }
 
 /// Builds the blocking request for a default response.
@@ -33,7 +33,7 @@ pub fn get_default_async_get_request(query: &String, client: &impl AsyncIpApi) -
 /// # Returns
 /// A `blocking::RequestBuilder` for the request.
 pub fn get_default_blocking_get_request(query: &String, client: &impl BlockingIpApi) -> blocking::RequestBuilder {
-    get_blocking_get_request::<IpDefaultResponse>(&query, client)
+    get_blocking_get_request::<IpDefaultResponse>(query, client)
 }
 
 /// Builds the async request for a custom response.
@@ -51,8 +51,8 @@ where
 {
     let url = get_url::<T>(query, client);
     match client.get_api_key() {
-        Some(_) => build_https_get_request(&url, client.get_api_key().as_ref().unwrap(), &client.get_http_client()),
-        None => build_http_get_request(&url, &client.get_http_client()),
+        Some(_) => build_https_get_request(&url, client.get_api_key().as_ref().unwrap(), client.get_http_client()),
+        None => build_http_get_request(&url, client.get_http_client()),
     }
 }
 
@@ -88,7 +88,7 @@ where
 ///
 /// # Returns
 /// A `RequestBuilder` for the request.
-fn build_https_get_request(url: &String, api_key: &String, client: &Client) -> RequestBuilder {
+fn build_https_get_request(url: &String, api_key: &str, client: &Client) -> RequestBuilder {
     client.get(url).headers(build_https_header(api_key))
 }
 
@@ -104,7 +104,7 @@ fn build_https_get_request(url: &String, api_key: &String, client: &Client) -> R
 #[cfg(feature = "blocking")]
 fn build_blocking_https_get_request(
     url: &String,
-    api_key: &String,
+    api_key: &str,
     client: &blocking::Client,
 ) -> blocking::RequestBuilder {
     client.get(url).headers(build_https_header(api_key))
@@ -172,7 +172,7 @@ fn build_http_header() -> HeaderMap {
 ///
 /// # Returns
 /// A `HeaderMap` containing the headers.
-fn build_https_header(api_key: &String) -> HeaderMap {
+fn build_https_header(api_key: &str) -> HeaderMap {
     let mut headers = build_http_header();
     headers.insert("Authorization: Bearer", api_key.parse().unwrap());
     headers

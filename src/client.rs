@@ -29,7 +29,7 @@ pub trait BlockingIpApi: IpApi {
     ///
     /// # Returns
     /// * `IpDefaultResponse` - The response from the API.
-    fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, IpApiError>;
+    fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError>;
 
     /// Queries the API with all fields.
     ///
@@ -38,7 +38,7 @@ pub trait BlockingIpApi: IpApi {
     ///
     /// # Returns
     /// * `IpFullResponse` - The response from the API.
-    fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, IpApiError>;
+    fn query_api_fully(&self, ip: &str) -> Result<IpFullResponse, IpApiError>;
 
     /// Queries the API with a custom struct.
     ///
@@ -47,7 +47,7 @@ pub trait BlockingIpApi: IpApi {
     ///
     /// # Returns
     /// * `T` - The response from the API.
-    fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
+    fn query_api<T>(&self, ip: &str) -> Result<T, IpApiError>
     where
         T: DeserializeOwned;
 
@@ -67,7 +67,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Returns
     /// * `IpDefaultResponse` - The response from the API.
-    async fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, IpApiError>;
+    async fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError>;
 
     /// Queries the API with all fields.
     ///
@@ -76,7 +76,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Returns
     /// * `IpFullResponse` - The response from the API.
-    async fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, IpApiError>;
+    async fn query_api_fully(&self, ip: &str) -> Result<IpFullResponse, IpApiError>;
 
     /// Queries the API with a custom struct.
     ///
@@ -85,7 +85,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Returns
     /// * `T` - The response from the API.
-    async fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
+    async fn query_api<T>(&self, ip: &str) -> Result<T, IpApiError>
     where
         T: DeserializeOwned;
     /// Gets you the async http client.
