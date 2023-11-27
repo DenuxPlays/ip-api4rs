@@ -1,14 +1,21 @@
-//! # ip-api-rust
+//! # IP-API4rs
 //!
-//! A simple Rust wrapper for the [ip-api.com](https://ip-api.com) API.
+//! A simple Rust crate for the [ip-api.com](https://ip-api.com) API.
 
+use async_trait::async_trait;
 use governor::{DefaultDirectRateLimiter, Quota, RateLimiter};
 use nonzero_ext::nonzero;
+use reqwest::Client;
 use serde::de::DeserializeOwned;
 
-use crate::error::IpApiError;
 use model::ip_response::{IpDefaultResponse, IpFullResponse};
 
+use crate::client::{AsyncIpApi, IpApi};
+use crate::error::IpApiError;
+
+#[cfg(feature = "blocking")]
+pub mod blocking;
+mod client;
 pub mod constant;
 pub mod error;
 pub mod model;
@@ -18,9 +25,9 @@ pub mod util;
 /// The main client for the ip-api.com API.
 pub struct IpApiClient {
     /// The client to use for the requests.
-    pub client: reqwest::Client,
+    pub client: Client,
     /// The rate limiter to use for the requests.
-    pub limiter: DefaultDirectRateLimiter,
+    pub limiter: Option<DefaultDirectRateLimiter>,
     /// The API key to use for the requests.
     pub api_key: Option<String>,
 }
@@ -32,11 +39,11 @@ impl Default for IpApiClient {
 }
 
 impl IpApiClient {
-    /// Creates a new IpApiClient with no API key.
+    /// Creates a new BlockingIpApiClient with no API key.
     pub fn new() -> Self {
         Self {
-            client: reqwest::Client::new(),
-            limiter: RateLimiter::direct(Quota::per_minute(nonzero!(45u32))),
+            client: Client::new(),
+            limiter: Some(RateLimiter::direct(Quota::per_minute(nonzero!(45u32)))),
             api_key: None,
         }
     }
@@ -44,54 +51,52 @@ impl IpApiClient {
     /// Creates a new IpApiClient with an API key.
     pub fn new_with_api_key(api_key: String) -> Self {
         Self {
-            client: reqwest::Client::new(),
-            limiter: RateLimiter::direct(Quota::per_minute(nonzero!(45u32))),
+            client: Client::new(),
+            limiter: None,
             api_key: Some(api_key),
         }
     }
+}
 
-    /// Queries the API with the default fields.
-    ///
-    /// # Arguments
-    /// * `ip` - The IP address to query.
-    ///
-    /// # Returns
-    /// * `IpDefaultResponse` - The response from the API.
-    pub async fn query_api_default(&self, ip: &String) -> Result<IpDefaultResponse, IpApiError> {
-        let request = util::requests::build_default_get_request(&ip.to_string(), self);
+impl IpApi for IpApiClient {
+    fn get_api_key(&self) -> &Option<String> {
+        &self.api_key
+    }
+
+    fn get_rate_limiter(&self) -> &Option<DefaultDirectRateLimiter> {
+        &self.limiter
+    }
+}
+
+#[async_trait]
+impl AsyncIpApi for IpApiClient {
+    async fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError> {
+        let request = util::requests::get_default_async_get_request(&ip.to_string(), self);
         request_handler::perform_get_request::<IpDefaultResponse>(request, &self.limiter).await
     }
 
-    /// Queries the API with all fields.
-    ///
-    /// # Arguments
-    /// * `ip` - The IP address to query.
-    ///
-    /// # Returns
-    /// * `IpFullResponse` - The response from the API.
-    pub async fn query_api_fully(&self, ip: &String) -> Result<IpFullResponse, IpApiError> {
-        let request = util::requests::build_get_request::<IpFullResponse>(&ip.to_string(), self);
+    async fn query_api_fully(&self, ip: &str) -> Result<IpFullResponse, IpApiError> {
+        let request = util::requests::get_async_request::<IpFullResponse>(&ip.to_string(), self);
         request_handler::perform_get_request::<IpFullResponse>(request, &self.limiter).await
     }
 
-    /// Queries the API with a custom struct.
-    ///
-    /// # Arguments
-    /// * `ip` - The IP address to query.
-    ///
-    /// # Returns
-    /// * `T` - The response from the API.
-    pub async fn query_api<T>(&self, ip: &String) -> Result<T, IpApiError>
+    async fn query_api<T>(&self, ip: &str) -> Result<T, IpApiError>
     where
         T: DeserializeOwned,
     {
-        let request = util::requests::build_get_request::<T>(&ip.to_string(), self);
+        let request = util::requests::get_async_request::<T>(&ip.to_string(), self);
         request_handler::perform_get_request::<T>(request, &self.limiter).await
+    }
+
+    fn get_http_client(&self) -> &Client {
+        &self.client
     }
 }
 
 #[cfg(test)]
 mod test {
+    use crate::blocking::client::BlockingIpApiClient;
+    use crate::client::{AsyncIpApi, BlockingIpApi};
     use crate::error::IpApiError;
     use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
     use crate::util::urls::{build_http_url_from_struct, build_https_url_from_struct, build_url_without_fields};
@@ -128,7 +133,7 @@ mod test {
     async fn test_client() {
         let client = IpApiClient::new();
         assert_eq!(client.api_key, None);
-        let result = client.query_api_default(&EXTERN_TEST_IP.to_string()).await;
+        let result = client.query_api_default(EXTERN_TEST_IP).await;
         let expected = IpDefaultResponse {
             query: EXTERN_TEST_IP.to_string(),
             status: "success".to_string(),
@@ -153,7 +158,7 @@ mod test {
     async fn test_client_custom() {
         let client = IpApiClient::new();
         assert_eq!(client.api_key, None);
-        let result = client.query_api::<IpDefaultResponse>(&EXTERN_TEST_IP.to_string()).await;
+        let result = client.query_api::<IpDefaultResponse>(EXTERN_TEST_IP).await;
         let expected = IpDefaultResponse {
             query: EXTERN_TEST_IP.to_string(),
             status: "success".to_string(),
@@ -177,7 +182,7 @@ mod test {
     #[tokio::test]
     async fn test_error_reserved_range() {
         let client = IpApiClient::new();
-        let result = client.query_api::<IpDefaultResponse>(&"127.0.0.1".to_string()).await;
+        let result = client.query_api::<IpDefaultResponse>("127.0.0.1").await;
         match result.err().unwrap() {
             IpApiError::ReservedRange(error_response) => {
                 assert_eq!(error_response.message, "reserved range");
@@ -189,12 +194,62 @@ mod test {
     #[tokio::test]
     async fn test_error_invalid_query() {
         let client = IpApiClient::new();
-        let result = client.query_api::<IpDefaultResponse>(&"Invalid Query".to_string()).await;
+        let result = client.query_api::<IpDefaultResponse>("Invalid Query").await;
         match result.err().unwrap() {
             IpApiError::InvalidQuery(error_response) => {
                 assert_eq!(error_response.message, "invalid query");
             }
             _ => panic!("Wrong error type returned."),
         }
+    }
+
+    #[test]
+    fn test_blocking_client() {
+        let client = BlockingIpApiClient::new();
+        assert_eq!(client.api_key, None);
+        let result = client.query_api_default(EXTERN_TEST_IP);
+        let expected = IpDefaultResponse {
+            query: EXTERN_TEST_IP.to_string(),
+            status: "success".to_string(),
+            country: "United States".to_string(),
+            country_code: "US".to_string(),
+            region: "VA".to_string(),
+            region_name: "Virginia".to_string(),
+            city: "Ashburn".to_string(),
+            zip: "20149".to_string(),
+            lat: 39.03,
+            lon: -77.5,
+            timezone: "America/New_York".to_string(),
+            isp: "Google LLC".to_string(),
+            org: "Google Public DNS".to_string(),
+            as_number: "AS15169 Google LLC".to_string(),
+        };
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_blocking_client_custom() {
+        let client = BlockingIpApiClient::new();
+        assert_eq!(client.api_key, None);
+        let result = client.query_api::<IpDefaultResponse>(EXTERN_TEST_IP);
+        let expected = IpDefaultResponse {
+            query: EXTERN_TEST_IP.to_string(),
+            status: "success".to_string(),
+            country: "United States".to_string(),
+            country_code: "US".to_string(),
+            region: "VA".to_string(),
+            region_name: "Virginia".to_string(),
+            city: "Ashburn".to_string(),
+            zip: "20149".to_string(),
+            lat: 39.03,
+            lon: -77.5,
+            timezone: "America/New_York".to_string(),
+            isp: "Google LLC".to_string(),
+            org: "Google Public DNS".to_string(),
+            as_number: "AS15169 Google LLC".to_string(),
+        };
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 }
