@@ -27,7 +27,7 @@ async fn main() {
 
 ## Features
 
-- fully async api
+- fully async api (or blocking with the `blocking` feature)
 - simple to use
 - supply custom structs to only get want you want
 - Api-Token support

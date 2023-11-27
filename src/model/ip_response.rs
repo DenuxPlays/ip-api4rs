@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// A struct containing the complete response from the Ip Api.
 /// We ask the Api to return every field it can.
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct IpFullResponse {
     pub query: String,
     pub status: String,
@@ -26,7 +26,7 @@ pub struct IpFullResponse {
     pub isp: String,
     pub org: String,
     #[serde(rename = "as")]
-    pub as_number: String,
+    pub asn: String,
     #[serde(rename = "asname")]
     pub as_name: String,
     pub reverse: String,
@@ -37,7 +37,7 @@ pub struct IpFullResponse {
 
 /// A struct containing the default response from the Ip Api.
 /// We simply give the Api the Ip address with no extra parameters.
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct IpDefaultResponse {
     pub query: String,
     pub status: String,
@@ -55,11 +55,11 @@ pub struct IpDefaultResponse {
     pub isp: String,
     pub org: String,
     #[serde(rename = "as")]
-    pub as_number: String,
+    pub asn: String,
 }
 
 /// A module that contains the error type for the library.
-#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct ErrorResponse {
     pub status: String,
     pub message: String,

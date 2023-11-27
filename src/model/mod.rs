@@ -16,7 +16,7 @@
 //! #[allow(clippy::tabs_in_doc_comments)]
 //! async fn main() {
 //!    let client = IpApiClient::new();
-//!    let result = client.query_api::<Custom>(&"8.8.8.8".to_string()).await;
+//!    let result = client.query_api::<Custom>("8.8.8.8").await;
 //! }
 //! ```
 
