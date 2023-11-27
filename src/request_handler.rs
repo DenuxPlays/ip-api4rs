@@ -5,8 +5,10 @@ use crate::constant;
 use crate::error::IpApiError;
 use crate::model::ip_response::ErrorResponse;
 use governor::DefaultDirectRateLimiter;
-use reqwest::RequestBuilder;
+use reqwest::{blocking, RequestBuilder};
 use serde::de::DeserializeOwned;
+use std::thread::sleep;
+use std::time::Duration;
 
 /// Performs a GET request to the API.
 ///
@@ -18,26 +20,114 @@ use serde::de::DeserializeOwned;
 /// * `Result<T, ip-api4rs::error::IpApiError>` - The response from the API.
 pub async fn perform_get_request<T>(
     request_builder: RequestBuilder,
-    limiter: &DefaultDirectRateLimiter,
+    limiter: &Option<DefaultDirectRateLimiter>,
 ) -> Result<T, IpApiError>
 where
     T: DeserializeOwned,
 {
-    limiter.until_ready().await;
+    wait_for_rate_limiter(limiter).await;
     let response = request_builder.send().await?;
     let json = response.text().await?;
+    println!("{}", json);
+    process_result(json)
+}
+
+/// Performs a blocking GET request to the API.
+///
+/// # Arguments
+/// * `request_builder` - The request builder to use.
+/// * `limiter` - The rate limiter to use.
+///
+/// # Returns
+/// * `Result<T, ip-api4rs::error::IpApiError>` - The response from the API.
+#[cfg(feature = "blocking")]
+pub fn perform_blocking_get_request<T>(
+    request_builder: blocking::RequestBuilder,
+    limiter: &Option<DefaultDirectRateLimiter>,
+) -> Result<T, IpApiError>
+where
+    T: DeserializeOwned,
+{
+    block_until_rate_limiter(limiter);
+    let response = request_builder.send()?;
+    let json = response.text()?;
+    process_result::<T>(json)
+}
+
+/// Processes the result from the API.
+/// Checks for errors and parses the result.
+///
+/// # Arguments
+/// * `json` - The json to parse.
+///
+/// # Returns
+/// * `Result<T, ip-api4rs::error::IpApiError>` - The parsed result.
+fn process_result<T>(json: String) -> Result<T, IpApiError>
+where
+    T: DeserializeOwned,
+{
+    match validate_result(json.clone()) {
+        Some(error) => return Err(error),
+        None => (),
+    }
+    parse_result::<T>(&json)
+}
+
+/// Validates the result for errors.
+///
+/// # Arguments
+/// * `json` - The json to parse.
+///
+/// # Returns
+/// * `Option<IpApiError>` - The error if there is one.
+fn validate_result(json: String) -> Option<IpApiError> {
     if json.contains("\"status\":\"fail\"") {
         return match serde_json::from_str::<ErrorResponse>(&json) {
             Ok(error_response) => match error_response.message.as_str() {
-                constant::ERROR_RESERVED_RANGE => Err(IpApiError::ReservedRange(error_response)),
-                constant::ERROR_INVALID_QUERY => Err(IpApiError::InvalidQuery(error_response)),
-                _ => Err(IpApiError::Unknown(json)),
+                constant::ERROR_RESERVED_RANGE => Some(IpApiError::ReservedRange(error_response)),
+                constant::ERROR_INVALID_QUERY => Some(IpApiError::InvalidQuery(error_response)),
+                _ => Some(IpApiError::Unknown(json.clone())),
             },
-            Err(err) => Err(IpApiError::JsonParseError(err)),
+            Err(err) => Some(IpApiError::JsonParseError(err)),
         };
     }
+    None
+}
+
+/// Parses the result from the API.
+///
+/// # Arguments
+/// * `json` - The json to parse.
+///
+/// # Returns
+/// * `Result<T, ip-api4rs::error::IpApiError>` - The parsed result.
+fn parse_result<T>(json: &String) -> Result<T, IpApiError>
+where
+    T: DeserializeOwned,
+{
     match serde_json::from_str::<T>(&json) {
         Ok(response) => Ok(response),
         Err(err) => Err(IpApiError::JsonParseError(err)),
+    }
+}
+
+/// Waits for the rate limiter to be ready.
+async fn wait_for_rate_limiter(limiter: &Option<DefaultDirectRateLimiter>) {
+    match limiter {
+        Some(limiter) => limiter.until_ready().await,
+        None => (),
+    }
+}
+
+/// Blocks until the rate limiter is ready.
+#[cfg(feature = "blocking")]
+fn block_until_rate_limiter(limiter: &Option<DefaultDirectRateLimiter>) {
+    match limiter {
+        Some(limiter) => {
+            while limiter.check().is_err() {
+                sleep(Duration::new(1, 0));
+            }
+        }
+        None => (),
     }
 }
