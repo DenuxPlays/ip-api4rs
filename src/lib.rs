@@ -1,6 +1,6 @@
-//! # ip-api-rust
+//! # IP-API4rs
 //!
-//! A simple Rust wrapper for the [ip-api.com](https://ip-api.com) API.
+//! A simple Rust crate for the [ip-api.com](https://ip-api.com) API.
 
 use async_trait::async_trait;
 use governor::{DefaultDirectRateLimiter, Quota, RateLimiter};
@@ -8,9 +8,10 @@ use nonzero_ext::nonzero;
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 
+use model::ip_response::{IpDefaultResponse, IpFullResponse};
+
 use crate::client::{AsyncIpApi, IpApi};
 use crate::error::IpApiError;
-use model::ip_response::{IpDefaultResponse, IpFullResponse};
 
 #[cfg(feature = "blocking")]
 pub mod blocking;

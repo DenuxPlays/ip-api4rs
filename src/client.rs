@@ -1,11 +1,12 @@
-use crate::error::IpApiError;
-use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
 use async_trait::async_trait;
 use governor::DefaultDirectRateLimiter;
 use reqwest::blocking;
 use serde::de::DeserializeOwned;
 
-//TODO docs!!!
+use crate::error::IpApiError;
+use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
+
+/// The main client for the ip-api.com API.
 pub trait IpApi {
     /// Gets the optional API key.
     ///
@@ -20,6 +21,7 @@ pub trait IpApi {
     fn get_rate_limiter(&self) -> &Option<DefaultDirectRateLimiter>;
 }
 
+/// The blocking client for the ip-api.com API.
 #[cfg(feature = "blocking")]
 pub trait BlockingIpApi: IpApi {
     /// Queries the API with the default fields.
@@ -44,6 +46,7 @@ pub trait BlockingIpApi: IpApi {
     ///
     /// # Arguments
     /// * `ip` - The IP address to query.
+    /// * `T` - The custom struct to deserialize the response into.
     ///
     /// # Returns
     /// * `T` - The response from the API.
@@ -58,6 +61,7 @@ pub trait BlockingIpApi: IpApi {
     fn get_http_client(&self) -> &blocking::Client;
 }
 
+/// The async client for the ip-api.com API.
 #[async_trait]
 pub trait AsyncIpApi: IpApi {
     /// Queries the API with the default fields.
@@ -82,6 +86,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Arguments
     /// * `ip` - The IP address to query.
+    /// * `T` - The custom struct to deserialize the response into.
     ///
     /// # Returns
     /// * `T` - The response from the API.
