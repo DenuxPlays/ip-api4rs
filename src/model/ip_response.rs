@@ -26,7 +26,7 @@ pub struct IpFullResponse {
     pub isp: String,
     pub org: String,
     #[serde(rename = "as")]
-    pub as_number: String,
+    pub asn: String,
     #[serde(rename = "asname")]
     pub as_name: String,
     pub reverse: String,
@@ -55,7 +55,7 @@ pub struct IpDefaultResponse {
     pub isp: String,
     pub org: String,
     #[serde(rename = "as")]
-    pub as_number: String,
+    pub asn: String,
 }
 
 /// A module that contains the error type for the library.

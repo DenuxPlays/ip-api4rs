@@ -148,7 +148,7 @@ mod test {
             timezone: "America/New_York".to_string(),
             isp: "Google LLC".to_string(),
             org: "Google Public DNS".to_string(),
-            as_number: "AS15169 Google LLC".to_string(),
+            asn: "AS15169 Google LLC".to_string(),
         };
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), expected);
@@ -173,7 +173,7 @@ mod test {
             timezone: "America/New_York".to_string(),
             isp: "Google LLC".to_string(),
             org: "Google Public DNS".to_string(),
-            as_number: "AS15169 Google LLC".to_string(),
+            asn: "AS15169 Google LLC".to_string(),
         };
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), expected);
@@ -222,7 +222,7 @@ mod test {
             timezone: "America/New_York".to_string(),
             isp: "Google LLC".to_string(),
             org: "Google Public DNS".to_string(),
-            as_number: "AS15169 Google LLC".to_string(),
+            asn: "AS15169 Google LLC".to_string(),
         };
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), expected);
@@ -247,7 +247,7 @@ mod test {
             timezone: "America/New_York".to_string(),
             isp: "Google LLC".to_string(),
             org: "Google Public DNS".to_string(),
-            as_number: "AS15169 Google LLC".to_string(),
+            asn: "AS15169 Google LLC".to_string(),
         };
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), expected);
