@@ -1,6 +1,6 @@
 [package]
 name = "ip-api4rs"
-version = "2.0.1"
+version = "2.0.2"
 authors = ["Timon Klinkert <DenuxPlays@users.noreply.github.com>"]
 description = "A Rust library for the ip-api.com API."
 license = "Apache-2.0"
