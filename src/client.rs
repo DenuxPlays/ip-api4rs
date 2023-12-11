@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use governor::DefaultDirectRateLimiter;
+#[cfg(feature = "blocking")]
 use reqwest::blocking;
 use serde::de::DeserializeOwned;
 

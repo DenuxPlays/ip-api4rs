@@ -5,9 +5,13 @@ use crate::constant;
 use crate::error::IpApiError;
 use crate::model::ip_response::ErrorResponse;
 use governor::DefaultDirectRateLimiter;
-use reqwest::{blocking, RequestBuilder};
+#[cfg(feature = "blocking")]
+use reqwest::blocking;
+use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
+#[cfg(feature = "blocking")]
 use std::thread::sleep;
+#[cfg(feature = "blocking")]
 use std::time::Duration;
 
 /// Performs a GET request to the API.
