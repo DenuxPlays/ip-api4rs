@@ -32,6 +32,7 @@ pub fn get_default_async_get_request(query: &String, client: &impl AsyncIpApi) -
 ///
 /// # Returns
 /// A `blocking::RequestBuilder` for the request.
+#[cfg(feature = "blocking")]
 pub fn get_default_blocking_get_request(query: &String, client: &impl BlockingIpApi) -> blocking::RequestBuilder {
     get_blocking_get_request::<IpDefaultResponse>(query, client)
 }
