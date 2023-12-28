@@ -1,8 +1,8 @@
-use async_trait::async_trait;
 use governor::DefaultDirectRateLimiter;
 #[cfg(feature = "blocking")]
 use reqwest::blocking;
 use serde::de::DeserializeOwned;
+use std::future::Future;
 
 use crate::error::IpApiError;
 use crate::model::ip_response::{IpDefaultResponse, IpFullResponse};
@@ -63,7 +63,6 @@ pub trait BlockingIpApi: IpApi {
 }
 
 /// The async client for the ip-api.com API.
-#[async_trait]
 pub trait AsyncIpApi: IpApi {
     /// Queries the API with the default fields.
     ///
@@ -72,7 +71,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Returns
     /// * `IpDefaultResponse` - The response from the API.
-    async fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError>;
+    fn query_api_default(&self, ip: &str) -> impl Future<Output = Result<IpDefaultResponse, IpApiError>> + Send;
 
     /// Queries the API with all fields.
     ///
@@ -81,7 +80,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Returns
     /// * `IpFullResponse` - The response from the API.
-    async fn query_api_fully(&self, ip: &str) -> Result<IpFullResponse, IpApiError>;
+    fn query_api_fully(&self, ip: &str) -> impl Future<Output = Result<IpFullResponse, IpApiError>> + Send;
 
     /// Queries the API with a custom struct.
     ///
@@ -91,7 +90,7 @@ pub trait AsyncIpApi: IpApi {
     ///
     /// # Returns
     /// * `T` - The response from the API.
-    async fn query_api<T>(&self, ip: &str) -> Result<T, IpApiError>
+    fn query_api<T>(&self, ip: &str) -> impl Future<Output = Result<T, IpApiError>> + Send
     where
         T: DeserializeOwned;
     /// Gets you the async http client.

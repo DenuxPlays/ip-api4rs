@@ -2,7 +2,6 @@
 //!
 //! A simple Rust crate for the [ip-api.com](https://ip-api.com) API.
 
-use async_trait::async_trait;
 use governor::{DefaultDirectRateLimiter, Quota, RateLimiter};
 use nonzero_ext::nonzero;
 use reqwest::Client;
@@ -68,7 +67,6 @@ impl IpApi for IpApiClient {
     }
 }
 
-#[async_trait]
 impl AsyncIpApi for IpApiClient {
     async fn query_api_default(&self, ip: &str) -> Result<IpDefaultResponse, IpApiError> {
         let request = util::requests::get_default_async_get_request(&ip.to_string(), self);
