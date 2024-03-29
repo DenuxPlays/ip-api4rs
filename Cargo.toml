@@ -19,7 +19,7 @@ blocking = ["reqwest/blocking"]
 
 [dev-dependencies]
 # Async runtime
-tokio = { version = "1.36.0", features = ["rt", "macros", "rt-multi-thread"] }
+tokio = { version = "1.37.0", features = ["rt", "macros", "rt-multi-thread"] }
 
 [dependencies]
 # HTTP client
