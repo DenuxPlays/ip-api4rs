@@ -5,6 +5,7 @@
 //! ```
 //! use serde::{Deserialize, Serialize};
 //! use ip_api4rs::IpApiClient;
+//! use ip_api4rs::client::AsyncIpApi;
 //!
 //! #[derive(Deserialize, Serialize)]
 //! struct Custom {
