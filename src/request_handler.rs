@@ -115,21 +115,17 @@ where
 
 /// Waits for the rate limiter to be ready.
 async fn wait_for_rate_limiter(limiter: &Option<DefaultDirectRateLimiter>) {
-    match limiter {
-        Some(limiter) => limiter.until_ready().await,
-        None => (),
+    if let Some(limiter) = limiter {
+        limiter.until_ready().await
     }
 }
 
 /// Blocks until the rate limiter is ready.
 #[cfg(feature = "blocking")]
 fn block_until_rate_limiter(limiter: &Option<DefaultDirectRateLimiter>) {
-    match limiter {
-        Some(limiter) => {
-            while limiter.check().is_err() {
-                sleep(Duration::new(1, 0));
-            }
+    if let Some(limiter) = limiter {
+        while limiter.check().is_err() {
+            sleep(Duration::new(1, 0));
         }
-        None => (),
     }
 }
